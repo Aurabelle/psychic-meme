@@ -11,14 +11,8 @@ import ui.Board;
 public class CluedoCanvas extends JPanel{
 	//essential as it extends JPanel
 	private static final long serialVersionUID = 2L;
-	private final Dimension SIZE = new Dimension(600, 800);
 	
 	private Board board = new Board();
-	
-	@Override
-	public void setPreferredSize(Dimension d){
-		super.setPreferredSize(SIZE);
-	}
 	
 	@Override
 	protected void paintComponent(Graphics g){

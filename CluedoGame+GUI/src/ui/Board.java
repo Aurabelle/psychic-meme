@@ -41,6 +41,7 @@ public class Board {
 	private final Color YELLOW = new Color(237,250,121);
 	
 	private final int SQ_SIZE = 25;
+	private final int BORDER_OFFSET = 15;
 	  
 	public Board(){
 		
@@ -98,80 +99,68 @@ public class Board {
 		solutionSquares = new ArrayList<Location>();
 		startPositions = new ArrayList<Location>();
 		
-		for ( int cols = 0; cols < boardSquares.length; cols ++){
-			for ( int rows = 0; rows <  boardSquares[cols].length; rows ++){
-				if (cleanBoard[cols][rows] == 'x'){
-					boardSquares[cols][rows] = new NonPlayableSquare();
-					if(cols > 9 && cols < 16 && rows > 9 && rows < 17){
-						solutionSquares.add(new Location(cols, rows));
+		for ( int row = 0; row < boardSquares.length; row ++){
+			for ( int col = 0; col <  boardSquares[row].length; col ++){
+				if (cleanBoard[row][col] == 'x'){
+					boardSquares[row][col] = new NonPlayableSquare();
+					if(row > 9 && row < 16 && col > 9 && col < 17){
+						solutionSquares.add(new Location(row, col));
 					}
 				}
 				else {
-					boardSquares[cols][rows] = new EmptySquare();
+					boardSquares[row][col] = new EmptySquare();
 				}	
 				
-				if(cleanBoard[cols][rows] == 'd'){
-					if(cols < 6 && rows < 7){
-						Door door = new Door(kitchen, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+				if(cleanBoard[row][col] == 'd'){
+					if(row == 6  && col == 4){
+						Door door = new Door(kitchen, new Location(row, col));
+						boardSquares[row][col] = door;
 						kitchen.addDoor(door);
-						System.out.println("kitchen: (" + cols + ", " + rows +")" );
 					}
-					else if(cols < 8 && rows > 8 && rows < 16){
-						Door door = new Door(diningRoom, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+					else if(col < 8 && row > 8 && row < 16){
+						Door door = new Door(diningRoom, new Location(row, col));
+						boardSquares[row][col] = door;
 						diningRoom.addDoor(door);
-						System.out.println("dining: (" + cols + ", " + rows +")" );
 					}
-					else if(cols < 7 && rows > 18){
-						Door door = new Door(lounge, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+					else if(col < 7 && row > 18){
+						Door door = new Door(lounge, new Location(row, col));
+						boardSquares[row][col] = door;
 						lounge.addDoor(door);
-						System.out.println("lounge: (" + cols + ", " + rows +")" );
 					}
-					else if(cols > 7 && cols < 17 && rows < 8){
-						Door door = new Door(ballRoom, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+					else if(row < 8 && col < 17 && col > 7){
+						Door door = new Door(ballRoom, new Location(row, col));
+						boardSquares[row][col] = door;
 						ballRoom.addDoor(door);
-						System.out.println("ballroom: (" + cols + ", " + rows +")" );
 					}
-					else if(cols > 8 && cols < 16 && rows > 17){
-						Door door = new Door(hall, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+					else if(col > 8 && col < 16 && row > 17){
+						Door door = new Door(hall, new Location(row, col));
+						boardSquares[row][col] = door;
 						hall.addDoor(door);
-						System.out.println("hall: (" + cols + ", " + rows +")" );
 					}
-					else if(cols > 18 && rows < 6){
-						Door door = new Door(conservatory, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+					else if(col > 18 && row < 6){
+						Door door = new Door(conservatory, new Location(row, col));
+						boardSquares[row][col] = door;
 						conservatory.addDoor(door);
-						System.out.println("conservatory: (" + cols + ", " + rows +")" );
 					}
-					else if(cols > 18 && rows > 7 && rows < 13){
-						Door door = new Door(billiardRoom, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+					else if(col > 18 && row > 7 && row < 13){
+						Door door = new Door(billiardRoom, new Location(row, col));
+						boardSquares[row][col] = door;
 						billiardRoom.addDoor(door);
-						System.out.println("billiard: (" + cols + ", " + rows +")" );
 					}
-					else if(cols > 17 && rows > 13 && rows < 19){
-						Door door = new Door(library, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+					else if(col > 17 && row > 13 && row < 19){
+						Door door = new Door(library, new Location(row, col));
+						boardSquares[row][col] = door;
 						library.addDoor(door);
-						System.out.println("library: (" + cols + ", " + rows +")" );
 					}
-					else if(cols > 17 && rows > 20){
-						Door door = new Door(study, new Location(cols, rows));
-						boardSquares[cols][rows] = door;
+					else if(row == 21 && col == 18){
+						Door door = new Door(study, new Location(row, col));
+						boardSquares[row][col] = door;
 						study.addDoor(door);
-						System.out.println("study: (" + cols + ", " + rows +")" );
-					}
-					else{
-						System.out.println("(" + cols + ", " + rows + ")");
 					}
 				}
 				
-				if(cleanBoard[cols][rows] == '`'){
-					startPositions.add(new Location(cols, rows));
+				if(cleanBoard[row][col] == '`'){
+					startPositions.add(new Location(row, col));
 				}
 			}
 		}
@@ -199,9 +188,6 @@ public class Board {
 		
 		//sets all squares in a room to point to the singular room instance, so they all share the info
 		for (Room room : this.rooms){
-			/*for(Door d : room.getDoors()){
-				System.out.println(d.getLocation().toString());
-			}*/
 			for (Location location : room.getRoomSquares()){
 				Point point = new Point(location.getXLoc(), location.getYLoc());
 				boardSquares[point.x][point.y] = room;
@@ -379,20 +365,20 @@ public class Board {
 				
 				if(sq instanceof NonPlayableSquare){
 					g.setColor(PURPLE);
-					g.fillRect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE);
+					g.fillRect(j*SQ_SIZE + BORDER_OFFSET, i*SQ_SIZE+ BORDER_OFFSET, SQ_SIZE, SQ_SIZE);
 				}
 				else if(sq instanceof Stairs){
 					g.setColor(GREEN);
-					g.fillRect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE);
+					g.fillRect(j*SQ_SIZE+ BORDER_OFFSET, i*SQ_SIZE+ BORDER_OFFSET, SQ_SIZE, SQ_SIZE);
 				}
 				else if(startPositions.contains(new Location(i, j))){
 					g.setColor(PINK);
-					g.fillRect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE);
+					g.fillRect(j*SQ_SIZE+ BORDER_OFFSET, i*SQ_SIZE+ BORDER_OFFSET, SQ_SIZE, SQ_SIZE);
 				}
 				else{
 					//the rest are playable, or will get drawn over next
 					g.setColor(YELLOW);
-					g.fillRect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE);
+					g.fillRect(j*SQ_SIZE+ BORDER_OFFSET, i*SQ_SIZE+ BORDER_OFFSET, SQ_SIZE, SQ_SIZE);
 				}
 			}
 		}
@@ -401,7 +387,7 @@ public class Board {
 		g.setColor(Color.BLACK);
 		for(int i = 0; i < 25; i++){
 			for(int j = 0; j < 25; j++){
-				g.drawRect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE);
+				g.drawRect(j*SQ_SIZE+ BORDER_OFFSET, i*SQ_SIZE+ BORDER_OFFSET, SQ_SIZE, SQ_SIZE);
 			}		
 		}
 		
@@ -411,16 +397,20 @@ public class Board {
 				Square sq = boardSquares[i][j];
 				
 				if(sq instanceof Room){
-					g.setColor(Color.WHITE);
-					g.fillRect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE);
-				}
-				if(sq instanceof Door){
-					g.setColor(PINK);
-					g.fillRect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE);
-					g.setColor(Color.WHITE);
-					g.drawRect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE);
+					g.setColor(Color.DARK_GRAY);
+					g.fillRect(j*SQ_SIZE+ BORDER_OFFSET, i*SQ_SIZE+ BORDER_OFFSET, SQ_SIZE, SQ_SIZE);
 				}
 			}		
+		}
+		for(Room r : rooms){
+			for(Door d: r.getDoors()){
+				int x = d.getLocation().getXLoc();
+				int y = d.getLocation().getYLoc();
+				g.setColor(Color.GRAY);
+				g.fillRect(y*SQ_SIZE+ BORDER_OFFSET, x*SQ_SIZE+ BORDER_OFFSET, SQ_SIZE, SQ_SIZE);
+				g.setColor(Color.WHITE);
+				g.drawRect(y*SQ_SIZE+ BORDER_OFFSET, x*SQ_SIZE+ BORDER_OFFSET, SQ_SIZE, SQ_SIZE);
+			}
 		}
 		
 	}

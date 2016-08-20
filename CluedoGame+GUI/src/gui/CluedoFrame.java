@@ -1,18 +1,20 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 /**
  * CluedoFrame is what it says on the box: a frame for holding all the elements 
@@ -36,31 +38,51 @@ public class CluedoFrame extends Subject{
 	//required UID for JFrame extension
 	private static final long serialVersionUID = 1L;
 	
-	private Dimension totalSize = new Dimension(1000,800);
+	/*************************************************************************
+	 *					Abstract Methods for GUI actions 
+	 *************************************************************************/
+	//protected abstract void displayPlayerDetails(Graphics g);
+	//protected abstract void displayPlayerHand(Graphics g);
+	//protected abstract void displayBoard(Graphics g);
+	//protected abstract void onButtonPress(String action);
+	//protected abstract void onMouseClick(MouseEvent me);
+	
+	/**************************************************************************
+	 * 					GUI components & creation
+	 *************************************************************************/
+	private Dimension totalSize = new Dimension(1050,860);
+	private Dimension canvasSize = new Dimension(650, 700);
+	private Dimension mainInterfaceSize = new Dimension(850,860);
+	private Dimension userButtonSize = new Dimension(100, 860);
+	private Dimension playerDetailSize = new Dimension(100, 100);
+	private Dimension cardDisplaySize = new Dimension(650, 260);
 	
 	//components for overall frame layout (in descending order, biggest-smallest)
 	private JSplitPane completePane;
-	private JSplitPane playerInfoPane;	
+	private JSplitPane mainPlayerInterface;	//playerInfoPane and board/cards
+	private JSplitPane playerInfoPane;	//journal and player details
+	private JSplitPane boardAndCards;	// board and player's hand
 	
 	//actual display components
-	private JPanel playerJournal;
-	private CluedoCanvas canvas;
 	private JPanel userButtons;
+	private CluedoCanvas canvas;
+	private JPanel playerJournal;
+	private JPanel playerStats;
+	private JPanel cardDisplay;
 	
 	/**
 	 * Creates a new instance of a Cluedo GUI
 	 */
 	public CluedoFrame(){
 		super("Cluedo");
-		
-		canvas = new CluedoCanvas();
-		canvas.setPreferredSize(null);		//null should be overridden
-		
+
 		createUserButtons();
+		createBoardCardsPane();
 		createInfoPane();
+		
 		completePane = new JSplitPane();
 		completePane.setLeftComponent(userButtons);
-		completePane.setRightComponent(playerInfoPane);
+		completePane.setRightComponent(mainPlayerInterface);
 		
 		setLayout(new BorderLayout());
 		setPreferredSize(totalSize);
@@ -76,9 +98,11 @@ public class CluedoFrame extends Subject{
 	 * a player may take during their turn.
 	 */
 	private void createUserButtons(){
+		JPanel allButtons = new JPanel();
+		allButtons.setLayout(new GridLayout(0, 1, 0, 10));
+		
 		userButtons = new JPanel();
-		userButtons.setLayout(new BoxLayout(userButtons, BoxLayout.PAGE_AXIS));
-		userButtons.setPreferredSize(new Dimension(200,800));
+		userButtons.setPreferredSize(userButtonSize);
 		
 		//add the buttons that allow player interaction
 		JButton roll = new JButton("Roll Dice");
@@ -118,34 +142,60 @@ public class CluedoFrame extends Subject{
 			}
 		});
 		
-		Dimension buttonSize = new Dimension(50, 20);
-		
-		//doesn't actually work? 
-		roll.setPreferredSize(buttonSize);
-		move.setPreferredSize(buttonSize);
-		suggest.setPreferredSize(buttonSize);
-		accuse.setPreferredSize(buttonSize);
-		end.setPreferredSize(buttonSize);
-		
-		userButtons.add(roll);
-		userButtons.add(move);
-		userButtons.add(suggest);
-		userButtons.add(accuse);
-		userButtons.add(end);
+		allButtons.add(roll);
+		allButtons.add(move);
+		allButtons.add(suggest);
+		allButtons.add(accuse);
+		allButtons.add(end);
+
+		userButtons.add(allButtons);
 	}
 	
 	private void createInfoPane(){
-		playerInfoPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		playerInfoPane.setPreferredSize(new Dimension(800,800));
+		mainPlayerInterface = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		mainPlayerInterface.setPreferredSize(mainInterfaceSize);
 		
+		playerInfoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		
+		playerStats = new JPanel(){
+			@Override
+			public void paint(Graphics g){
+				//displayPlayerDetails(g);
+				g.setColor(Color.MAGENTA);
+				g.fillRect(0, 0, getWidth(), getHeight());
+			}
+		};
+		playerStats.setPreferredSize(playerDetailSize);
 		playerJournal = new JPanel();
 	    playerJournal.setLayout(new BorderLayout());
 
-	    playerJournal.add( new JLabel( "Notes:" ), BorderLayout.NORTH );
-	    playerJournal.add( new JTextArea(), BorderLayout.CENTER );
+	    playerJournal.add(new JLabel( "Notes:" ), BorderLayout.NORTH);
+	    playerJournal.add(new JTextArea(), BorderLayout.CENTER);
 	    
-	    playerInfoPane.setLeftComponent(canvas);
-	    playerInfoPane.setRightComponent(playerJournal);
+	    playerInfoPane.setTopComponent(playerStats);
+	    playerInfoPane.setBottomComponent(playerJournal);
+	    
+	    mainPlayerInterface.setLeftComponent(boardAndCards);
+	    mainPlayerInterface.setRightComponent(playerInfoPane);
+	}
+	
+	private void createBoardCardsPane(){
+		canvas = new CluedoCanvas();
+		canvas.setPreferredSize(canvasSize);	
+		
+		cardDisplay = new JPanel(){
+			@Override
+			public void paint(Graphics g){
+				//displayHand
+				g.setColor(Color.RED);
+				g.fillRect(0, 0, getWidth(), getHeight());
+			}
+		};
+		cardDisplay.setMaximumSize(cardDisplaySize);
+		
+		boardAndCards = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		boardAndCards.setTopComponent(canvas);
+		boardAndCards.setBottomComponent(cardDisplay);
 	}
 
 	
