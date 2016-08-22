@@ -15,6 +15,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -93,8 +94,8 @@ public class CluedoFrame extends Subject implements WindowListener, MouseListene
 	private JFrame popUpFrame;
 	
 	//helpers for player initialization
-	ArrayList<String> possibleTokens;
-	String token;
+	private ArrayList<String> possibleTokens;
+	JRadioButton[] options;
 	
 	/**
 	 * Creates a new instance of a Cluedo GUI
@@ -106,6 +107,7 @@ public class CluedoFrame extends Subject implements WindowListener, MouseListene
 	
 	private void initialise(){
 		populateTokenArray();
+		
 		createUserButtons();
 		createBoardCardsPane();
 		createInfoPane();
@@ -257,7 +259,7 @@ public class CluedoFrame extends Subject implements WindowListener, MouseListene
 		fileMenu.add(newGameOpt);
 		fileMenu.add(new JMenuItem("Exit"));
 		
-		menuBar.add(fileMenu);
+		menuBar.add(fileMenu);	
 	}
 
 	/**
@@ -275,7 +277,8 @@ public class CluedoFrame extends Subject implements WindowListener, MouseListene
 
 		if(numPlayers > 2){
 			//onButtonPress("numPlayers");
-			initialise();
+			//set player menu state to selectable? 
+			System.out.println(numPlayers);
 		}
 		return numPlayers;
 	}
@@ -296,43 +299,32 @@ public class CluedoFrame extends Subject implements WindowListener, MouseListene
 	}
 	
 	public String getPlayerToken(){
-		popUpFrame = new JFrame("Choose Player Character");
-		// Create the components for the popup
-        JLabel title = new JLabel("Click the \"Okay\" button once you have selected your desired character.",
-                JLabel.CENTER);
-        JPanel choicePanel = createTokenChoiceDialog();
-        
-        // Set the layout.
-        popUpFrame.setLayout(new BorderLayout());
-        popUpFrame.add(title, BorderLayout.NORTH);      
-        popUpFrame.add(choicePanel, BorderLayout.CENTER);
+		popUpFrame = new JFrame();
 
-        // Exit when the window is closed.
-        popUpFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
-
-        popUpFrame.pack();
-        popUpFrame.setVisible(true); 
-
-		return token;
+		int r = JOptionPane.showConfirmDialog(popUpFrame, createTokenChoiceDialog(), "Player Character Choice", JOptionPane.OK_OPTION);
+		
+		if(r == JOptionPane.YES_OPTION){
+			for (JRadioButton button : options) {
+	            if (button.isSelected()) {
+	            	return button.getActionCommand();
+	            }
+	        }
+		}
+		return "none"; 
+	}
+	
+	private void removeToken(String token){
+		int index = possibleTokens.indexOf(token);
+		possibleTokens.remove(index);
 	}
 	
 	private JPanel createTokenChoiceDialog(){
-		//create an actionListener which does nothing when the 
-		//button is selected, since we want that to happen AFTER
-		//the dialog is okayed to close
-		ActionListener redundant = new ActionListener(){
-			public void actionPerformed(ActionEvent e) {}
-		};
-		//create the buttons, add the actionListener, and add each one to the 
-		//buttonGroup IF it's still in the possible selections array
-		JRadioButton[] options = new JRadioButton[possibleTokens.size()];
-		ButtonGroup group = new ButtonGroup();
+		options = new JRadioButton[possibleTokens.size()];
+		ButtonGroup buttonGroup = new ButtonGroup();
 		
 		 for(int i = 0; i < possibleTokens.size(); i++){
-			 System.out.println(possibleTokens.get(i));
 			 //if this is the first button added, set it as selected (to avoid not having something selected when 
 			 //the dialog is exited)
-			 //This method should not be called if all 6 players have already been initialized
 			 JRadioButton jrb; 
 			 if(i == 0){
 				 jrb = new JRadioButton(possibleTokens.get(i), true);
@@ -343,48 +335,20 @@ public class CluedoFrame extends Subject implements WindowListener, MouseListene
 				 jrb = new JRadioButton(possibleTokens.get(i));
 				 jrb.setActionCommand(possibleTokens.get(i));
 			 }
-			 jrb.addActionListener(redundant);
 			 options[i] = jrb;
-			 group.add(jrb);
+			 buttonGroup.add(jrb);
 		 }
-		 
-		 //create the button to confirm selection
-		 JButton confirm = new JButton("Okay");
-		 confirm.addActionListener(new ActionListener() {
-			@Override	
-			 public void actionPerformed(ActionEvent ev) {
-					//find out which JRadioButton is selected, get value,
-					//remove value from list of tokens and return it
-					String selected = group.getSelection().getActionCommand();
-					for(int i = 0; i < possibleTokens.size(); i++){
-						if(possibleTokens.get(i).equals(selected)){
-							possibleTokens.remove(i);
-							token = selected; 
-						}
-					}
-				}
-			});
-		 
-		 return createTokenPane("Avaliable characters:", options, confirm);
-	}
-	
-	private JPanel createTokenPane(String description, JRadioButton[] options, JButton confirmButton){
-		JPanel radioOptions = new JPanel();
-        JLabel label = new JLabel(description);
+		
+		 JPanel radioOptions = new JPanel();
+        JLabel label = new JLabel("Please choose your character token: ");
 
-        radioOptions.setLayout(new BorderLayout());
+        radioOptions.setLayout(new BoxLayout(radioOptions, BoxLayout.Y_AXIS));
         radioOptions.add(label);
 
         for (int i = 0; i < options.length; i++) {
             radioOptions.add(options[i]);
         }
-
-        JPanel pane = new JPanel();
-        pane.setLayout(new BorderLayout());
-        pane.add(radioOptions, BorderLayout.NORTH);
-        pane.add(confirmButton, BorderLayout.SOUTH);
-
-        return pane;
+        return radioOptions;
 	}
 	
 	private void populateTokenArray(){
@@ -427,8 +391,6 @@ public class CluedoFrame extends Subject implements WindowListener, MouseListene
 	
  	public static void main(String args[]){
  		CluedoFrame cf = new CluedoFrame();
- 		System.out.println(cf.getPlayerName());
- 		System.out.println(cf.getPlayerToken());
  	}
 	/*************************************************************************
 	 * The following methods are required for the Window/MouseListener 
